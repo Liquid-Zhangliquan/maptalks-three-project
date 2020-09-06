@@ -17,4 +17,14 @@ module.exports = {
   chainWebpack: config => {
     config.performance.set('hints', false);
   },
+  configureWebpack: {
+    module: {
+      rules: [
+        {
+          test: /\.glsl$/i,
+          use: 'raw-loader',
+        },
+      ],
+    },
+  },
 }

@@ -1,8 +1,6 @@
-const Qg = "\n  #define pi 3.1415926535\n  #define PI2RAD 0.01745329252\n  #define TWO_PI (2. * PI)\n";
-const Gg =
-        "\n  float rands(float p){\n    return fract(sin(p) * 10000.0);\n  }\n";
-const ky =
-        "\n  vec3 rands(vec3 c) {\n    float j = 4096.0*sin(dot(c,vec3(17.0, 59.4, 15.0)));\n    vec3 r;\n    r.z = fract(512.0*j);\n    j *= .125;\n    r.x = fract(512.0*j);\n    j *= .125;\n    r.y = fract(512.0*j);\n    return r-0.5;\n  }\n";
+const Qg = require("@/utils/shader/Qg.glsl").default;
+const Gg = require("@/utils/shader/Gg.glsl").default;
+const ky = require("@/utils/shader/ky.glsl").default;
 import * as THREE from "three";
 
 export function getBreathWallMaterial(opts = {}) {

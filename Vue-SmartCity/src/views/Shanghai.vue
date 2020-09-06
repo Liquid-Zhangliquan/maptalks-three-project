@@ -17,6 +17,7 @@ import RingEffect from '@/utils/ringEffect';
 import RingTextureEffect from '@/utils/ringTextureEffect';
 import ElectricShield from '@/utils/electricShield';
 import { mapStyle } from '@/utils/baseMapStyle';
+import { randomNum } from '@/utils/utils';
 import {
   getRippleWall,
   getWallTextureMaterial,
@@ -488,19 +489,6 @@ export default {
         color: '#00295a'
       });
     },
-
-    randomNum(Min, Max) {
-      let Range = Max - Min;
-      let Rand = Math.random();
-      if (Math.round(Rand * Range) == 0) {
-        return Min + 1;
-      } else if (Math.round(Rand * Max) == Max) {
-        return Max - 1;
-      } else {
-        let num = Min + Math.round(Rand * Range) - 1;
-        return num;
-      }
-    },
     canvasOne() {
       const width = 512,
         height = 1024;
@@ -517,9 +505,9 @@ export default {
       let added = [true, false, false];
       for (let x = 10; x < width; x += 50) {
         for (let y = 10; y < height; y += 50) {
-          let isLight = added[this.randomNum(0, 2)];
-          let hsl = `hsl(183,${this.randomNum(10, 90)}%,${this.randomNum(10, 90)}%)`;
-          let _color = colors2[this.randomNum(0, 3)];
+          let isLight = added[randomNum(0, 2)];
+          let hsl = `hsl(183,${randomNum(10, 90)}%,${randomNum(10, 90)}%)`;
+          let _color = colors2[randomNum(0, 3)];
           if (isLight) {
             context.fillStyle = _color;
             context.fillRect(x, y, 15, 15);
