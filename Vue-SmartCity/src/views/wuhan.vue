@@ -19,7 +19,6 @@ import ElectricShield from '@/utils/electricShield';
 import { mapStyle } from '@/utils/baseMapStyle';
 import { randomNum } from '@/utils/utils';
 import {
-  getMeteorMaterial,
   getRippleWall,
   getWallTextureMaterial,
   getRippleShieldMaterial,
@@ -35,8 +34,6 @@ import {
   halfBallCoord2,
   randarCoord1,
   randarCoord2,
-  rippleWallCoord,
-  rippleWallCoord2,
   shangHaiData
 } from '@/utils/config/shanghai';
 export default {
@@ -55,10 +52,10 @@ export default {
   methods: {
     loadMap() {
       window.map = new maptalks.Map('map', {
-        // center: [114.3938, 30.50838],//武汉
-        center: [121.50095457703048, 31.238960386861237], //上海
-        zoom: 17,
-        pitch: 60,
+        center: [114.39970327210904, 30.448899387908767],
+        zoom: 16,
+        pitch: 55,
+        bearing: 14.8,
         // attribution: false,
         view: {
           projection: 'baidu'
@@ -72,7 +69,7 @@ export default {
       map.on('click', e => {
         console.log(e.coordinate);
       });
-      // this.changeView();
+      this.changeView();
       let buildFeature = [],
         roadFeature = [],
         waterFeature = [];
@@ -154,10 +151,6 @@ export default {
         let ringMesh = this.getRingMesh(threeLayer);
         // 扩散圆柱
         let ringBuildMesh = this.getringBuildMesh(threeLayer);
-        // 流星墙
-        let MeteorMesh = this.getMeteorMesh(threeLayer);
-
-        let RippleWallMesh = this.getRippleWallMesh(threeLayer);
         //雷达
         let randarMesh = this.getRandarMesh(threeLayer);
         //水面
@@ -176,19 +169,7 @@ export default {
         boxMesh.add(pl);
         boxMesh.position.set(v.x, v.y, 2);
         // threeLayer.addMesh(boxMesh);
-        threeLayer.addMesh(
-          meshs.concat(
-            buildMesh,
-            roadMesh,
-            ballMesh,
-            ringMesh,
-            randarMesh,
-            ringBuildMesh,
-            MeteorMesh,
-            RippleWallMesh,
-            waterMesh
-          )
-        );
+        threeLayer.addMesh(meshs.concat(buildMesh, roadMesh, ballMesh, ringMesh, randarMesh, ringBuildMesh, waterMesh));
         threeLayer.config('animation', true);
       };
       threeLayer.addTo(map);
@@ -240,18 +221,6 @@ export default {
         mesh.getObject3d().scale.set(num, num, 1);
         requestAnimationFrame(animate);
       }
-      return [mesh];
-    },
-    getMeteorMesh(threeLayer) {
-      let material = getMeteorMaterial();
-      let mesh = new rippleWall(rippleWallCoord, { height: 250 }, material, threeLayer);
-      mesh.getObject3d().renderOrder = 11;
-      return [mesh];
-    },
-    getRippleWallMesh(threeLayer) {
-      let material = getRippleWall();
-      let mesh = new rippleWall(rippleWallCoord2, { height: 250 }, material, threeLayer);
-      mesh.getObject3d().renderOrder = 11;
       return [mesh];
     },
     addArcLine(threeLayer) {
