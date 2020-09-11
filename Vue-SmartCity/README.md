@@ -21,8 +21,10 @@ glsl一般用于这种 #include 引用的代码
 
 ## 在线glsl-edit
 # website
+```bash
 [zhouzhili-glgl-edit](http://zhouzhili.github.io/dist_frag/index.html)
 [gong-glsl-show](https://www.aigisss.com/glsl/#/getting_start)
+```
 # repositories
 [webGL-fragment-render](https://github.com/zhouzhili/webGL-fragment-render)
 ```bash
