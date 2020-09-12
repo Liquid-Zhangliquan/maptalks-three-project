@@ -7,16 +7,16 @@
 import * as THREE from 'three';
 import * as maptalks from 'maptalks';
 import { ThreeLayer } from 'maptalks.three';
-import { MeshLineMaterial } from '@/utils/THREE.MeshLine';
+import { MeshLineMaterial } from '@/utils/lib/THREE.MeshLine';
 
 import { MeshBasicMaterial } from 'three';
-import rippleWall from '@/utils/rippleWall';
-import ocean from '@/utils/ocean';
-import arcLine from '@/utils/arcLine';
-import RingEffect from '@/utils/ringEffect';
-import RingTextureEffect from '@/utils/ringTextureEffect';
-import ElectricShield from '@/utils/electricShield';
-import { mapStyle } from '@/utils/baseMapStyle';
+import rippleWall from '@/utils/maptalks.three.objects/rippleWall';
+import ocean from '@/utils/maptalks.three.objects/ocean';
+import arcLine from '@/utils/maptalks.three.objects/arcLine';
+import RingEffect from '@/utils/maptalks.three.objects/ringEffect';
+import RingTextureEffect from '@/utils/maptalks.three.objects/ringTextureEffect';
+import ElectricShield from '@/utils/maptalks.three.objects/electricShield';
+import { mapStyle } from '@/utils/config/baseMapStyle';
 import { randomNum } from '@/utils/utils';
 import {
   getMeteorMaterial,

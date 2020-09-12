@@ -1,7 +1,8 @@
-import * as THREE from "three";
-import * as maptalks from "maptalks";
-import { BaseObject } from "maptalks.three";
-import { MeshLine } from "./THREE.MeshLine";
+import * as maptalks from 'maptalks';
+import { BaseObject } from 'maptalks.three';
+import * as THREE from 'three';
+import { MeshLine } from '../lib/THREE.MeshLine';
+
 var OPTIONS = {
   altitude: 0,
   speed: 0.01,
@@ -13,16 +14,13 @@ class ArcLine extends BaseObject {
     super();
     options.offset = material.uniforms.offset.value;
     options.clock = new THREE.Clock();
-    //geoutil.js getLinePosition
+    // geoutil.js getLinePosition
     options = maptalks.Util.extend({}, OPTIONS, options, { layer, lineString });
     this._initOptions(options);
 
     const { altitude, height } = options;
     const points = getArcPoints(
-      lineString,
-      layer.distanceToVector3(height, height).x,
-      layer
-    );
+      lineString, layer.distanceToVector3(height, height).x, layer);
     const geometry = new THREE.Geometry();
     geometry.vertices = points;
     const meshLine = new MeshLine();
@@ -66,7 +64,7 @@ function getArcPoints(lineString, height, layer) {
   const v = layer.coordinateToVector3(first).sub(centerPt);
   const v1 = layer.coordinateToVector3(last).sub(centerPt);
   const vh = layer.coordinateToVector3(center, height).sub(centerPt);
-  const ellipse = new THREE.CatmullRomCurve3([v, vh, v1], false, "catmullrom");
+  const ellipse = new THREE.CatmullRomCurve3([v, vh, v1], false, 'catmullrom');
   const points = ellipse.getPoints(40);
   return points;
 }
