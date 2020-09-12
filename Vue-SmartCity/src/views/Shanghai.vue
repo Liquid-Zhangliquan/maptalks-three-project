@@ -22,19 +22,19 @@ import {
   getMeteorMaterial,
   getRippleWall,
   getWallTextureMaterial,
-  getRippleShieldMaterial,
-  getElectricShieldMaterial,
   getBuildTextureShaderMaterial,
+  getDiffusionShieldMaterial,
+  getElectricShieldMaterial,
   getRingEffectMaterial,
-  getRandarMetarial,
+  getRadarMetarial,
   FlabellumScanMaterial
-} from '@/utils/shader';
+} from '@/utils/shader/shader';
 import {
   ringCoord,
   halfBallCoord,
   halfBallCoord2,
-  randarCoord1,
-  randarCoord2,
+  RadarCoord1,
+  RadarCoord2,
   rippleWallCoord,
   rippleWallCoord2,
   shangHaiData
@@ -159,7 +159,7 @@ export default {
 
         let RippleWallMesh = this.getRippleWallMesh(threeLayer);
         //雷达
-        let randarMesh = this.getRandarMesh(threeLayer);
+        let RadarMesh = this.getRadarMesh(threeLayer);
         //水面
         let waterMesh = this.getWaterMesh(waterFeature, threeLayer);
 
@@ -182,7 +182,7 @@ export default {
             roadMesh,
             ballMesh,
             ringMesh,
-            randarMesh,
+            RadarMesh,
             ringBuildMesh,
             MeteorMesh,
             RippleWallMesh,
@@ -279,11 +279,11 @@ export default {
         threeLayer.addMesh(arcline);
       });
     },
-    getRandarMesh(threeLayer) {
+    getRadarMesh(threeLayer) {
       let object = new RingEffect(
         halfBallCoord2,
         { radius: 260, speed: 0.01 },
-        getRandarMetarial({ color: '#CC3366', type: 2 }),
+        getRadarMetarial({ color: '#CC3366', type: 2 }),
         threeLayer
       );
       object.getObject3d().renderOrder = 5;
@@ -295,19 +295,19 @@ export default {
       // );
       // object2.getObject3d().renderOrder = 5;
       // object2.getObject3d().position.z = 0.5;
-      this.getScanRandarMesh(threeLayer);
+      this.getScanRadarMesh(threeLayer);
       // let v = threeLayer.coordinateToVector3(halfBallCoord2);
       // //内部半径 外部半径 圆环的分段数(值越大，圆环就越圆) 最小值为1，默认值为8  起始角度(默认值为0) 圆心角，默认值为Math.PI * 2
       // let object = new THREE.Mesh(
       //   new THREE.RingBufferGeometry(0.0001, 1, 20, 5, 0, Math.PI * 2),
-      //   this.getRandarMetarial("#CC3366", 2)
+      //   this.getRadarMetarial("#CC3366", 2)
       // );
       // object.position.x = v.x;
       // object.position.y = v.y;
       // object.position.z = 0;
       return [object];
     },
-    getScanRandarMesh(threeLayer) {
+    getScanRadarMesh(threeLayer) {
       let v = threeLayer.coordinateToVector3(halfBallCoord2);
       const r = threeLayer.distanceToVector3(500, 500).x;
       let object = new THREE.Mesh(new THREE.PlaneBufferGeometry(r, r, 2), FlabellumScanMaterial());
@@ -357,7 +357,7 @@ export default {
       var ball2 = new ElectricShield(
         halfBallCoord2,
         { radius: 250, speed: 0.015 },
-        getRippleShieldMaterial({
+        getDiffusionShieldMaterial({
           color: '#9999FF',
           num: 3,
           opacity: 1
@@ -392,7 +392,7 @@ export default {
       });
       roadFeature.forEach(g => {
         if (g.geometry && g.geometry.coordinates && g.geometry.type != 'MultiLineString') {
-          // material = this.getRippleShieldMaterial({
+          // material = this.getDiffusionShieldMaterial({
           //   color: this.getRandomColor(),
           //   dura: Math.random() * 0.007,
           //   opacity: 1

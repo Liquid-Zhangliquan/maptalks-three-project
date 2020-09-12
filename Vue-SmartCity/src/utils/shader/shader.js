@@ -1,6 +1,6 @@
 const Qg = require("@/utils/shader/glsl/Qg.glsl").default;
 const Gg = require("@/utils/shader/glsl/Gg.glsl").default;
-const ky = require("@/utils/shader/glsl/Ky.glsl").default;
+const Ky = require("@/utils/shader/glsl/Ky.glsl").default;
 import * as THREE from "three";
 
 export function getBreathWallMaterial(opts = {}) {
@@ -86,44 +86,11 @@ export function getRippleWall(opts = {}) {
                         value: 0.3,
                 },
         };
-        let vertexShaderSource = "\n  precision lowp float;\n  precision lowp int;\n  "
-                .concat(
-                        THREE.ShaderChunk.fog_pars_vertex,
-                        "\n  varying vec2 vUv;\n  void main() {\n    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n    vUv = uv;\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n    "
-                )
-                .concat(THREE.ShaderChunk.fog_vertex, "\n  }\n");
-        // let Qg =
-        //   "\n  #define pi 3.1415926535\n  #define PI2RAD 0.01745329252\n  #define TWO_PI (2. * PI)\n";
-        let fragmentShaderSource = `
-                  precision lowp float;
-                  precision lowp int;
-                  uniform float time;
-                  uniform float opacity;
-                  uniform vec3 color;
-                  uniform float num;
-                  uniform float hiz;
-                  varying vec2 vUv;
-                  void main() {
-                    vec4 fragColor = vec4(0.);
-                      float sin = sin((vUv.y - time * hiz) * 10. * num);
-                      float high = 0.92;
-                      float medium = 0.4;
-                      if (sin > high) {
-                        fragColor = vec4(mix(vec3(.8, 1., 1.), color, (1. - sin) / (1. - high)), 1.);
-                      } else if(sin > medium) {
-                        fragColor = vec4(color, mix(1., 0., 1.-(sin - medium) / (high - medium)));
-                      } else {
-                        fragColor = vec4(color, 0.);
-                      }
-                      vec3 fade = mix(color, vec3(0., 0., 0.), vUv.y);
-                      fragColor = mix(fragColor, vec4(fade, 1.), 0.85);
-                      gl_FragColor = vec4(fragColor.rgb, fragColor.a * opacity * (1. - vUv.y));
-                  }`;
         let meshMaterial = new THREE.ShaderMaterial({
                 uniforms: uniforms,
                 defaultAttributeValues: {},
-                vertexShader: vertexShaderSource,
-                fragmentShader: fragmentShaderSource,
+                vertexShader: require("@/utils/shader/vert/RippleWall_vertex.vert").default,
+                fragmentShader: require("@/utils/shader/frag/RippleWall_fragment.frag").default,
                 blending: THREE.AdditiveBlending,
                 transparent: !0,
                 depthWrite: !1,
@@ -131,11 +98,6 @@ export function getRippleWall(opts = {}) {
                 side: THREE.DoubleSide,
                 fog: !0,
         });
-        // animate();
-        // export function animate() {
-        //   uniforms.time.value += 0.025;
-        //   requestAnimationFrame(animate);
-        // }
         return meshMaterial;
 };
 //贴图围墙
@@ -154,29 +116,11 @@ export function getWallTextureMaterial(opts = {}) {
                         value: opts.opacity || 0.7,
                 },
         };
-        var vertexShaderSource = "\n  precision lowp float;\n  precision lowp int;\n  "
-                .concat(
-                        THREE.ShaderChunk.fog_pars_vertex,
-                        "\n  varying vec2 vUv;\n  void main() {\n    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n    vUv = uv;\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n    "
-                )
-                .concat(THREE.ShaderChunk.fog_vertex, "\n  }\n");
-        var fragmentShaderSource = `
-                  precision lowp float;
-                  precision lowp int;
-                  uniform vec3 color;
-                  uniform sampler2D map;
-                  uniform float opacity;
-                  varying vec2 vUv;
-                  void main()
-                  {
-                    vec4 tex = texture2D(map, vUv);
-                    gl_FragColor = vec4(tex.rgb * color, tex.a * opacity);
-                  }`;
         let meshMaterial = new THREE.ShaderMaterial({
                 uniforms: uniforms,
                 defaultAttributeValues: {},
-                vertexShader: vertexShaderSource,
-                fragmentShader: fragmentShaderSource,
+                vertexShader: require("@/utils/shader/vert/WallTexture_vertex.vert").default,
+                fragmentShader: require("@/utils/shader/frag/WallTexture_fragment.frag").default,
                 blending: THREE.AdditiveBlending,
                 transparent: !0,
                 depthWrite: !1,
@@ -207,45 +151,11 @@ export function getDiffusionShieldMaterial(opts = {}) {
                         value: opts.num || 1,
                 },
         };
-        let vertexShaderSource = "\n  precision lowp float;\n  precision lowp int;\n  "
-                .concat(
-                        THREE.ShaderChunk.fog_pars_vertex,
-                        "\n  varying vec2 vUv;\n  void main() {\n    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n    vUv = uv;\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n    "
-                )
-                .concat(THREE.ShaderChunk.fog_vertex, "\n  }\n");
-        // let Qg =
-        //   "\n  #define pi 3.1415926535\n  #define PI2RAD 0.01745329252\n  #define TWO_PI (2. * PI)\n";
-        let fragmentShaderSource = `
-                  precision lowp float;
-                  precision lowp int;
-                  uniform vec3 color;
-                  uniform float opacity;
-                  uniform float hiz;
-                  uniform float num;
-                  uniform float time;
-                  varying vec2 vUv;
-                  
-                  #define pi 3.1415926535
-                  #define PI2RAD 0.01745329252
-                  #define TWO_PI (2. * PI)
-          
-                  void main() {
-                    vec2 uv = vUv;
-                    if (uv.y < 0.5) {//只显示一半的uv--半球
-                      discard;
-                    }
-                    uv += num;
-                    uv.y += time;
-                    float glowPower = 0.018;
-                    float glow = glowPower / mod(abs(uv.y - 0.5), 1.) - (glowPower / 0.5);
-                    gl_FragColor = vec4(max(vec3(glow - 0.4 + color), color) * color, clamp(0.0, 1.0, glow * 1.) * opacity);
-                    gl_FragColor = mix(gl_FragColor, vec4(color, mix(0.15, 0.4, 1. - (vUv.y - 0.5) / 0.5)), 0.35);
-                  }`;
         let meshMaterial = new THREE.ShaderMaterial({
                 uniforms: uniforms,
                 defaultAttributeValues: {},
-                vertexShader: vertexShaderSource,
-                fragmentShader: fragmentShaderSource,
+                vertexShader: require("@/utils/shader/vert/DiffusionShield_vertex.vert").default,
+                fragmentShader: require("@/utils/shader/frag/DiffusionShield_fragment.frag").default,
                 blending: THREE.AdditiveBlending,
                 transparent: !0,
                 depthWrite: !1,
@@ -255,7 +165,7 @@ export function getDiffusionShieldMaterial(opts = {}) {
         });
         return meshMaterial;
 };
-//防护罩
+//电子防护罩
 export function getElectricShieldMaterial(opts = {}) {
         var ElectricShield = {
                 uniforms: {
@@ -273,76 +183,8 @@ export function getElectricShieldMaterial(opts = {}) {
                                 value: opts.opacity || 1,
                         },
                 },
-                vertexShaderSource: "\n  precision lowp float;\n  precision lowp int;\n  "
-                        .concat(
-                                THREE.ShaderChunk.fog_pars_vertex,
-                                "\n  varying vec2 vUv;\n  void main() {\n    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );\n    vUv = uv;\n    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n    "
-                        )
-                        .concat(THREE.ShaderChunk.fog_vertex, "\n  }\n"),
-                fragmentShaderSource: `
-                    #extension GL_OES_standard_derivatives : enable
-                    uniform vec3 color;
-                    uniform float opacity;
-                    uniform float time;
-                    varying vec2 vUv;
-                    #define pi 3.1415926535
-                    #define PI2RAD 0.01745329252
-                    #define TWO_PI (2. * PI)
-                    float rands(float p){
-                      return fract(sin(p) * 10000.0);
-                    }
-                    float noise(vec2 p){
-                      float t = time / 20000.0;
-                      if(t > 1.0) t -= floor(t);
-                      return rands(p.x * 14. + p.y * sin(t) * 0.5);
-                    }
-                    vec2 sw(vec2 p){
-                      return vec2(floor(p.x), floor(p.y));
-                    }
-                    vec2 se(vec2 p){
-                      return vec2(ceil(p.x), floor(p.y));
-                    }
-                    vec2 nw(vec2 p){
-                      return vec2(floor(p.x), ceil(p.y));
-                    }
-                    vec2 ne(vec2 p){
-                      return vec2(ceil(p.x), ceil(p.y));
-                    }
-                    float smoothNoise(vec2 p){
-                      vec2 inter = smoothstep(0.0, 1.0, fract(p));
-                      float s = mix(noise(sw(p)), noise(se(p)), inter.x);
-                      float n = mix(noise(nw(p)), noise(ne(p)), inter.x);
-                      return mix(s, n, inter.y);
-                    }
-                    float fbm(vec2 p){
-                      float z = 2.0;
-                      float rz = 0.0;
-                      vec2 bp = p;
-                      for(float i = 1.0; i < 6.0; i++){
-                        rz += abs((smoothNoise(p) - 0.5)* 2.0) / z;
-                        z *= 2.0;
-                        p *= 2.0;
-                      }
-                      return rz;
-                    }
-                    void main() {
-                      vec2 uv = vUv;
-                      vec2 uv2 = vUv;
-                      if (uv.y < 0.5) {
-                        discard;
-                      }
-                      uv *= 4.;
-                      float rz = fbm(uv);
-                      uv /= exp(mod(time * 2.0, pi));
-                      rz *= pow(15., 0.9);
-                      gl_FragColor = mix(vec4(color, opacity) / rz, vec4(color, 0.1), 0.2);
-                      if (uv2.x < 0.05) {
-                        gl_FragColor = mix(vec4(color, 0.1), gl_FragColor, uv2.x / 0.05);
-                      }
-                      if (uv2.x > 0.95){
-                        gl_FragColor = mix(gl_FragColor, vec4(color, 0.1), (uv2.x - 0.95) / 0.05);
-                      }
-                    }`,
+                vertexShaderSource: require("@/utils/shader/vert/ElectricShield_vertex.vert").default,
+                fragmentShaderSource: require("@/utils/shader/frag/ElectricShield_fragment.frag").default,
         };
         let meshMaterial = new THREE.ShaderMaterial({
                 uniforms: ElectricShield.uniforms,
@@ -494,7 +336,7 @@ export function getElectricRippleShieldMaterial(opts = {}) {
                         )
                         .concat(THREE.ShaderChunk.fog_vertex, "\n  }\n"),
                 fragmentShaderSource: "\n  #extension GL_OES_standard_derivatives : enable\n\n  uniform vec3 color;\n  uniform float opacity;\n  uniform float time;\n  varying vec2 vUv;\n\n  ".concat(
-                        ky,
+                        Ky,
                         "\n  \n  /* skew constants for 3d simplex functions */\n  const float F3 =  0.3333333;\n  const float G3 =  0.1666667;\n\n  /* 3d simplex noise */\n  float simplex3d(vec3 p) {\n    /* 1. find current tetrahedron T and it's four vertices */\n    /* s, s+i1, s+i2, s+1.0 - absolute skewed (integer) coordinates of T vertices */\n    /* x, x1, x2, x3 - unskewed coordinates of p relative to each of T vertices*/\n    \n    /* calculate s and x */\n    vec3 s = floor(p + dot(p, vec3(F3)));\n    vec3 x = p - s + dot(s, vec3(G3));\n    \n    /* calculate i1 and i2 */\n    vec3 e = step(vec3(0.0), x - x.yzx);\n    vec3 i1 = e*(1.0 - e.zxy);\n    vec3 i2 = 1.0 - e.zxy*(1.0 - e);\n      \n    /* x1, x2, x3 */\n    vec3 x1 = x - i1 + G3;\n    vec3 x2 = x - i2 + 2.0*G3;\n    vec3 x3 = x - 1.0 + 3.0*G3;\n    \n    /* 2. find four surflets and store them in d */\n    vec4 w, d;\n    \n    /* calculate surflet weights */\n    w.x = dot(x, x);\n    w.y = dot(x1, x1);\n    w.z = dot(x2, x2);\n    w.w = dot(x3, x3);\n    \n    /* w fades from 0.6 at the center of the surflet to 0.0 at the margin */\n    w = max(0.6 - w, 0.0);\n    \n    /* calculate surflet components */\n    d.x = dot(rands(s), x);\n    d.y = dot(rands(s + i1), x1);\n    d.z = dot(rands(s + i2), x2);\n    d.w = dot(rands(s + 1.0), x3);\n    \n    /* multiply d by w^4 */\n    w *= w;\n    w *= w;\n    d *= w;\n    \n    /* 3. return the sum of the four surflets */\n    return dot(d, vec4(52.0));\n  }\n\n  float noise(vec3 m) {\n      return   0.5333333*simplex3d(m)\n        +0.2666667*simplex3d(2.0*m)\n        +0.1333333*simplex3d(4.0*m)\n        +0.0666667*simplex3d(8.0*m);\n  }\n\n  void main() {\n    vec2 uv = vUv;\n    uv.x = uv.x - 0.5;\n    if (vUv.y < 0.5) {\n      discard;\n    }\n    vec3 p3 = vec3(vUv, time*0.4);    \n      \n    float intensity = noise(vec3(p3*12.0+12.0));\n                            \n    float t = clamp((uv.x * -uv.x * 0.2) + 0.15, 0., 1.);                         \n    float y = fract(abs(intensity * -t + fract(uv.y) - fract(-time)));                  \n      \n    float g = pow(y, 0.15);\n    \n    vec3 col = vec3(2.);\n    col = col * -g + col;                    \n    col = col * col;\n    col = col * col;\n\n    gl_FragColor = vec4(col * color, opacity);\n  }\n"
                 ),
         };
@@ -513,60 +355,9 @@ export function getElectricRippleShieldMaterial(opts = {}) {
         return meshMaterial;
 };
 export function getBuildTextureShaderMaterial(imgData, options) {
-        var building_vertex = `
-                  precision highp float;
-                  precision highp int;
-                  attribute vec2 maxUv;
-                  varying vec2 vUv;
-                  void main() {
-                    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                  }
-                `;
-        var building_fragment = `
-                  #extension GL_OES_standard_derivatives : enable
-                  precision highp float;
-                  precision highp int;
-                  uniform vec3 color;
-                  uniform float opacity;
-                  uniform sampler2D maps[1];
-                  varying vec2 vUv;
-                  void main(void){
-                    vec2 uv = vUv;
-                    gl_FragColor = texture2D(maps[0], uv);
-                  }
-                `;
-        //vec4 tex = texture2D(maps[0], uv);
-        // gl_FragColor = vec4(tex.rgb, tex.a * opacity);
-
-        //gl_FragColor = texture2D(maps[0], uv);
-
-        // building_fragment = `
-        //   #extension GL_OES_standard_derivatives : enable
-        //   precision highp float;
-        //   precision highp int;
-        //   uniform vec3 color;
-        //   uniform float opacity;
-        //   uniform sampler2D maps[1];
-        //   varying vec2 vUv;
-        //   void main(void){
-        //     vec2 uv = vUv;
-        //     if (uv.y < 0.1) {
-        //       gl_FragColor = texture2D(maps[0], uv);
-        //     } else if (uv.y < 0.2) {
-        //       gl_FragColor = texture2D(maps[0], uv);
-        //     } else if (uv.y < 0.5) {
-        //       gl_FragColor = texture2D(maps[0], uv);
-        //     }else
-        //       gl_FragColor = texture2D(maps[0], uv);
-        //   }
-        // `;
         const texture = new THREE.TextureLoader().load(imgData);
         // texture.needsUpdate = true; //使用贴图时进行更新
         texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-        // texture.repeat.set(0.002, 0.002);
-        // texture.repeat.set(2, 2);
         return new THREE.ShaderMaterial({
                 uniforms: {
                         opacity: {
@@ -581,12 +372,11 @@ export function getBuildTextureShaderMaterial(imgData, options) {
                                 value: [texture],
                         },
                 },
-                vertexShader: building_vertex,
-                fragmentShader: building_fragment,
+                vertexShader: require("@/utils/shader/vert/Building_vertex.vert").default,
+                fragmentShader: require("@/utils/shader/frag/Building_fragment.frag").default,
                 // polygonOffsetFactor: 0,
                 // polygonOffsetUnits: 1,
                 transparent: !1,
-                // blending: THREE.AdditiveBlending,
                 // blending: THREE.AdditiveBlending,
                 side: THREE.DoubleSide,
         });
@@ -640,8 +430,7 @@ export function getMeteorMaterial(opts = {}) {
 };
 //扩散圆环
 export function getRingEffectMaterial(color, type) {
-        var ringShield = {
-                //扩散圆环
+        const ringShield = {
                 uniforms: {
                         color: {
                                 type: "c",
@@ -660,41 +449,10 @@ export function getRingEffectMaterial(color, type) {
                                 value: 4,
                         },
                 },
-                vertexShaderSource: `
-                      varying vec2 vUv;
-                      void main(){
-                              vUv = uv;
-                              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                      }`,
-                fragmentShaderSource: `
-                      uniform float time;
-                      uniform vec3 color;
-                      uniform float type;
-                      uniform float num;
-                      varying vec2 vUv;\n
-                      void main(){
-                          float alpha = 1.0;
-                          float dis = distance(vUv,vec2(0.5));//0-0.5
-                          if(dis > 0.5){
-                              discard;
-                          }
-                          if(type ==0.0){
-                                  float y = (sin(6.0 * num *(dis-time)) + 1.0)/2.0;
-                              alpha = smoothstep(1.0,0.0,abs(y-0.5)/0.5) * (0.5 -dis) * 2.;
-                          }else if(type ==1.0){
-                                  float step = fract(time* 4.)* 0.5;
-                              if(dis<step){
-                                      // alpha = smoothstep(1.0,0.0,abs(step-dis)/0.15);
-                                  alpha =1.- abs(step-dis)/0.15;
-                              }else{
-                                      alpha = smoothstep(1.0,0.0,abs(step-dis)/0.05);
-                              }
-                              alpha *= (pow((0.5 -dis)* 3.0,2.0));
-                          }
-                          gl_FragColor = vec4(color,alpha );
-                      }`,
+                vertexShaderSource: require("@/utils/shader/vert/RingEffect_vertex.vert").default,
+                fragmentShaderSource: require("@/utils/shader/frag/RingEffect_fragment.frag").default,
         };
-        let meshMaterial = new THREE.ShaderMaterial({
+        const meshMaterial = new THREE.ShaderMaterial({
                 uniforms: ringShield.uniforms,
                 defaultAttributeValues: {},
                 vertexShader: ringShield.vertexShaderSource,
@@ -707,17 +465,11 @@ export function getRingEffectMaterial(color, type) {
                 transparent: !0,
                 fog: !0,
         });
-        // animate();
-        // export function animate() {
-        //   ringShield.uniforms.time.value += speed || 0.005;
-        //   requestAnimationFrame(animate);
-        // }
         return meshMaterial;
 };
 //雷达
 export function getRadarMetarial(opts = {}) {
-        var RadarShield = {
-                //雷达
+        const RadarShield = {
                 uniforms: {
                         time: {
                                 type: "f",
@@ -732,94 +484,10 @@ export function getRadarMetarial(opts = {}) {
                                 value: new THREE.Color(opts.color || 0x00ffff),
                         },
                 },
-                vertexShaderSource: `
-                      varying vec2 vUv;
-                      uniform float type;
-                      uniform float time;
-                      const float PI = 3.141592653589;
-                      void main(){
-                          vUv = uv;
-                          vec3 pos = position;
-                          if(type==1.0){
-                              float a = -time * 2.0 * PI;
-                              mat4 rMat= mat4(
-                                  cos(a), -sin(a), 0.0,0.0,
-                                  sin(a), cos(a), 0.0,0.0,
-                                  0.0, 0.0, 1.0,0.0,
-                                  0.0, 0.0, 0.0,1.0
-                              );
-                              gl_Position = projectionMatrix * modelViewMatrix * rMat * vec4(pos, 1.0);
-                          }else{
-                                  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                          }
-                      }`,
-                fragmentShaderSource: `
-                      uniform float time;
-                      uniform vec3 color;
-                      uniform float type;
-                      varying vec2 vUv;
-                      const float PI = 3.141592653589;
-                      void main(){
-                          vec2 center = vec2(0.5);
-                          float dis = distance(vUv,center);
-                          vec2 direct = normalize(vec2(vUv.x - center.x,vUv.y - center.y));
-          
-                          if(type==0.0||type==1.0){
-                              float step = fract(time);
-                              vec2 start = normalize(vec2(cos(2.0 * PI * step),sin(2.0 * PI * step)));
-                              float radius1 = 0.49;
-                              float radius2 = 0.0003;//中心圆环大小
-                              float alpha1 = smoothstep(1.0,0.0,abs(dis-radius1)/0.01);
-                              float alpha2 = smoothstep(1.0,0.0,abs(dis-radius2)/0.02);
-                              float alphastep;
-                              if(type==0.0){
-                                  alphastep = smoothstep(0.0,1.0,dot(direct,start));
-                          }else if(type==1.0){
-                                  float diff = atan(0.0,1.0) - atan(direct.y,direct.x);
-                                  if(diff > 0.0){
-                                      alphastep = smoothstep(1.0,0.0,diff/PI);
-                              }else{
-                                      alphastep = smoothstep(0.03,0.0,abs(diff)/PI);
-                              }
-                          }
-                          if(dis<radius1){
-                                  gl_FragColor =  vec4(color,alphastep + (1.0 - alphastep) *alpha2 + alpha1);
-                          }else{
-                                  gl_FragColor =  vec4(color,alpha1 + alpha2);
-                          }
-                          }else if(type==2.0){
-                                  float radius = 0.49;
-                                  float alpha = 0.0;
-                                  float step = fract(time);
-                                  for(int i =0;i<5;i++){
-                                      vec2 start = normalize(vec2(cos(2.0 * PI * step),sin(2.0 * PI * step)));
-                                      float alphax = smoothstep(0.5,1.0,dot(direct,start));
-                                      float alphay = smoothstep(1.0,0.0,abs(dis-radius)/0.01);
-                                      if(alphax >0.0 && alphay >0.0){
-                                          // alpha += (alphax + alphay) * 0.5;
-                                          alpha += (alphax * alphay) ;
-                                  }
-                                  radius -= 0.1;
-                                  step -=0.55;
-                              }
-                              step = fract(1.0 - time);
-                              radius = 0.44;
-                              for(int i =0;i<4;i++){
-                                      vec2 start = normalize(vec2(cos(2.0 * PI * step),sin(2.0 * PI * step)));
-                                  float alphax = smoothstep(0.5,1.0,dot(direct,start));
-                                  float alphay = smoothstep(1.0,0.0,abs(dis-radius)/0.01);
-                                  if(alphax >0.0 && alphay >0.0){
-                                          alpha += (alphax * alphay) ;
-                                  }
-                                  radius -= 0.1;
-                                  step -=0.55;
-                              }
-                              gl_FragColor =  vec4(color,alpha);
-                          }
-          
-                      }`,
+                vertexShaderSource: require("@/utils/shader/vert/Radar_vertex.vert").default,
+                fragmentShaderSource: require("@/utils/shader/frag/Radar_fragment.frag").default,
         };
-        let meshMaterial = new THREE.ShaderMaterial({
+        const meshMaterial = new THREE.ShaderMaterial({
                 uniforms: RadarShield.uniforms,
                 defaultAttributeValues: {},
                 vertexShader: RadarShield.vertexShaderSource,
@@ -832,18 +500,11 @@ export function getRadarMetarial(opts = {}) {
                 transparent: !1,
                 fog: !0,
         });
-        // animate();
-        // export function animate() {
-        //   RadarShield.uniforms.time.value += 0.015;
-        //   requestAnimationFrame(animate);
-        // }
         return meshMaterial;
 };
 //雷达扫描
 export function FlabellumScanMaterial(opts = {}) {
-        //new THREE.PlaneBufferGeometry(this.radius,this.radius,2)
-        var ScanShield = {
-                //雷达
+        let ScanShield = {
                 uniforms: {
                         time: {
                                 type: "f",
@@ -858,41 +519,10 @@ export function FlabellumScanMaterial(opts = {}) {
                                 value: opts.color || 1,
                         },
                 },
-                vertexShaderSource: `
-                    varying vec2 vUv;
-                    void main(){
-                            vUv = uv;
-                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                    }`,
-                fragmentShaderSource: `
-                    precision lowp float;
-                    precision lowp int;
-                    varying vec2 vUv;
-                    uniform float time;
-                    uniform vec3 color;
-                    uniform float opacity;
-          
-                    #define pi 3.1415926535
-                    #define PI2RAD 0.01745329252
-                    #define TWO_PI (2. * PI)
-                    
-                    void main() {
-                      vec2 pos = vUv - 0.5;
-                      float r = length(pos);
-                      if (r > 0.5) {
-                        discard;
-                      }
-                      float t = atan(pos.y, pos.x) - time*2.5;
-                      float a = (atan(sin(t), cos(t)) + pi)/(2.0*pi);
-                      float ta = 0.5;
-                      float v = smoothstep(ta-0.05,ta+0.05,a) * smoothstep(ta+0.05,ta-0.05,a);
-                      vec3 col = vec3(0, v, 0);
-                      float blink = pow(sin(time*1.5)*0.5+0.5, 0.8);
-                      gl_FragColor = vec4(color, opacity * pow(a, 8.0*(.2+blink))*(sin(r*300.0)*.5+.5)*pow(r, 0.4));
-                    }
-                  `,
+                vertexShaderSource: require("@/utils/shader/vert/FlabellumScan_vertex.vert").default,
+                fragmentShaderSource: require("@/utils/shader/frag/FlabellumScan_fragment.frag").default,
         };
-        let material = new THREE.ShaderMaterial({
+        const material = new THREE.ShaderMaterial({
                 uniforms: ScanShield.uniforms,
                 vertexShader: ScanShield.vertexShaderSource,
                 fragmentShader: ScanShield.fragmentShaderSource,
@@ -1060,7 +690,7 @@ export function getLightningLineMaterial(opts = {}) {
                                 "\n  varying vec2 vUv;\n\n  "
                         )
                         .concat(
-                                ky,
+                                Ky,
                                 "\n  /* skew constants for 3d simplex functions */\n  const float F3 =  0.3333333;\n  const float G3 =  0.1666667;\n\n  /* 3d simplex noise */\n  float simplex3d(vec3 p) {\n    /* 1. find current tetrahedron T and it's four vertices */\n    /* s, s+i1, s+i2, s+1.0 - absolute skewed (integer) coordinates of T vertices */\n    /* x, x1, x2, x3 - unskewed coordinates of p relative to each of T vertices*/\n\n    /* calculate s and x */\n    vec3 s = floor(p + dot(p, vec3(F3)));\n    vec3 x = p - s + dot(s, vec3(G3));\n\n    /* calculate i1 and i2 */\n    vec3 e = step(vec3(0.0), x - x.yzx);\n    vec3 i1 = e*(1.0 - e.zxy);\n    vec3 i2 = 1.0 - e.zxy*(1.0 - e);\n\n    /* x1, x2, x3 */\n    vec3 x1 = x - i1 + G3;\n    vec3 x2 = x - i2 + 2.0*G3;\n    vec3 x3 = x - 1.0 + 3.0*G3;\n\n    /* 2. find four surflets and store them in d */\n    vec4 w, d;\n\n    /* calculate surflet weights */\n    w.x = dot(x, x);\n    w.y = dot(x1, x1);\n    w.z = dot(x2, x2);\n    w.w = dot(x3, x3);\n\n    /* w fades from 0.6 at the center of the surflet to 0.0 at the margin */\n    w = max(0.6 - w, 0.0);\n\n    /* calculate surflet components */\n    d.x = dot(rands(s), x);\n    d.y = dot(rands(s + i1), x1);\n    d.z = dot(rands(s + i2), x2);\n    d.w = dot(rands(s + 1.0), x3);\n\n    /* multiply d by w^4 */\n    w *= w;\n    w *= w;\n    d *= w;\n\n    /* 3. return the sum of the four surflets */\n    return dot(d, vec4(52.0));\n  }\n\n  float noise(vec3 m) {\n      return   0.5333333*simplex3d(m)\n        +0.2666667*simplex3d(2.0*m)\n        +0.1333333*simplex3d(4.0*m)\n        +0.0666667*simplex3d(8.0*m);\n  }\n  void main(){\n    vec2 uv = vUv - 0.5;\n    vec2 p = gl_FragCoord.xy/resolution.x;\n    vec3 p3 = vec3(p, time*0.4);\n\n    float intensity = noise(vec3(p3*12.0+12.0));\n\n    float t = clamp((uv.x * -uv.x * 0.16) + 0.15, 0., 1.);\n    float y = abs(intensity * -t + uv.y * 0.5);\n\n    float g = pow(y, 0.2);\n\n    // vec3 col = vec3(1.70, 1.48, 1.78);\n    vec3 col = vec3(1.) * 1.7;\n    col = col * -g + col;\n    col = col * col;\n    col = col * col;\n\n    gl_FragColor = vec4(col * color, opacity);\n    "
                         )
                         .concat(THREE.ShaderChunk.fog_fragment, "\n  }\n"),
